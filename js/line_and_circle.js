@@ -49,7 +49,8 @@ function circle(x, y, r, c) {
 function getInstant(x, y) {
     let m = x[0] - y[0];
     let n = x[1] - y[1];
-    return Math.sqrt(m * m + n * n);
+    let r = Math.round(Math.sqrt(m * m + n * n));
+    return r;
 }
 
 /**
