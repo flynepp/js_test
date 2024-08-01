@@ -1,0 +1,21 @@
+@charset "utf-8";
+/* CSS Document */
+.mr-cont {
+	height: 900px;
+	width: 1600px;
+	margin: 0 auto;
+	position: relative;
+	border: 1px solid #f00;
+	background: rgb(243, 114, 255);
+	display: flex;
+}
+
+span {
+	position: absolute;
+	top: 50px;
+	left: 250px;
+}
+
+canvas {
+	flex: 1;
+}
