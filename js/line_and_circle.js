@@ -42,14 +42,14 @@ function circle(x, y, r, c) {
 /**
  * 计算两点坐标的距离
  * 
- * @param {number[]} x 坐标数组
- * @param {number[]} y 坐标数组
- * @returns {number}
+ * @param {number[]} x 坐标数组    x= [a, b]    
+ * @param {number[]} y 坐标数组    y= [m, n]
+ * @returns {number}               
  */
 function getInstant(x, y) {
     let m = x[0] - y[0];
     let n = x[1] - y[1];
-    return Math.sqrt(m * m + n * n);
+    return Math.round(Math.sqrt(m * m + n * n));
 }
 
 /**
