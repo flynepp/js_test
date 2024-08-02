@@ -18,7 +18,7 @@
     * @param {number|boolean} distance 间距（px）
     * @param {number[]|number} count 数量（默认为150~200），也可填入单个数值
     */-->
-  <canvas height="900px" width="1600px" id="cav" onClick="getCircle(50)"></canvas>
+  <canvas height="900px" width="1600px" id="cav" onClick="I_need_cirlce_and_line()"></canvas>
 </div>
 </body>
 
