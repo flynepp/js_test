@@ -135,9 +135,34 @@ function I_need_cirlce_and_line() {
     let position = [];
     let pos = circle.getPos();
     
+    /**
+     * 处理每个圆的坐标并生成关联坐标
+     * 位置数组（position）:
+     * [
+     *   // 每个元素是一个数组，代表一个圆的位置及其关联的坐标
+     *   [
+     *     // position[0] 是第一个圆的坐标及其关联坐标
+     *     [x1, y1], // 第一个圆的原始坐标
+     *     [x1_new1, y1_new1], // 生成的第一个新坐标
+     *     [x1_new2, y1_new2]  // 生成的第二个新坐标（如果有的话）
+     *   ],
+     *   [
+     *     // position[1] 是第二个圆的坐标及其关联坐标
+     *     [x2, y2], // 第二个圆的原始坐标
+     *     [x2_new1, y2_new1], // 生成的第一个新坐标
+     *     [x2_new2, y2_new2]  // 生成的第二个新坐标（如果有的话）
+     *   ]
+     *   // 依此类推，直到所有圆的位置和关联坐标都被处理
+     * ]
+     */
     for(let i = 0; i < pos.length; i++) {
-        let position[i] = [];
-        position[i].push([pos[i][1],pos[i][2]); 
+        position[i] = [];
+        position[i].push([pos[i][0],pos[i][1]); 
+
+        for(let j = 0; j < RandomNumberBetween(1, 2); j++) {
+            let newPos = getRandomPos(position[i][0],RandomNumberBetween(20, 30));
+            position[i].push(newPos);
+        }
     }
     
 }
