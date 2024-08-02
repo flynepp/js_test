@@ -129,7 +129,27 @@ function Circles(){
 }
 
 function I_need_cirlce_and_line() {
-    getCircle(50,15);//distance > 50, count = 15
+    const circle = Circles();
+    circle.getCircle(50,15);//draw circles, distance > 50, count = 15
 
+    let position = [];
+    let pos = circle.getPos();
+    
+    for(let i = 0; i < pos.length; i++) {
+        let position[i] = [];
+        position[i].push([pos[i][1],pos[i][2]); 
+    }
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
