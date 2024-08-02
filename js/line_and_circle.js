@@ -70,61 +70,62 @@ function Circles(){
     let position = [];
 
     return {
-    /**
-     * 画多个圆
-     * 
-     * @param {number|boolean} distance 间距（px）
-     * @param {number[]|number} count 数量（默认为150~200），也可填入单个数值
-     */
-    getCircle: function (distance = false, count = [150, 200]) {
-        let times;
-    
-        if (Array.isArray(count)) {
-            times = RandomNumberBetween(count[0], count[1]);
-        } else {
-            times = count;
-        }
-    
-        position = [];
-    
-        for (let i = 0; i < times; i++) {
-            let x = RandomNumber(1600);
-            let y = RandomNumber(900);
-            let r = RandomNumberBetween(3, 5);
-            let c = 'rgba(25,0,25,0.5)';
-    
-            if (distance) {
-                let isValidPosition = true;
-    
-                for (let j = 0; j < position.length; j++) {
-                    let existingPoint = position[j];
-                    let distanceBetweenPoints = getInstant([x, y], existingPoint);
-    
-                    if (distanceBetweenPoints < distance) {
-                        isValidPosition = false;
-                        break;
+
+        /**
+         * 画多个圆
+         * 
+         * @param {number|boolean} distance 间距（px）
+         * @param {number[]|number} count 数量（默认为150~200），也可填入单个数值
+         */
+        getCircle: function (distance = false, count = [150, 200]) {
+            let times;
+        
+            if (Array.isArray(count)) {
+                times = RandomNumberBetween(count[0], count[1]);
+            } else {
+                times = count;
+            }
+        
+            position = [];
+        
+            for (let i = 0; i < times; i++) {
+                let x = RandomNumber(1600);
+                let y = RandomNumber(900);
+                let r = RandomNumberBetween(3, 5);
+                let c = 'rgba(25,0,25,0.5)';
+        
+                if (distance) {
+                    let isValidPosition = true;
+        
+                    for (let j = 0; j < position.length; j++) {
+                        let existingPoint = position[j];
+                        let distanceBetweenPoints = getInstant([x, y], existingPoint);
+        
+                        if (distanceBetweenPoints < distance) {
+                            isValidPosition = false;
+                            break;
+                        }
+                    }
+                    if (!isValidPosition) {
+                        i--;
+                        continue;
                     }
                 }
-    
-                if (!isValidPosition) {
-                    i--;
-                    continue;
-                }
+        
+                circle(x, y, r, c);
+                position.push([x, y]);
             }
-    
-            circle(x, y, r, c);
-            position.push([x, y]);
-        }
-    },
+        },
 
-    /**
-     * 获取所有画的圆的位置
-     * 
-     * @returns {number[][]} 返回位置数组
-     */
-    getPos: function() {
-        return position;
-    }    
+        /**
+         * 获取所有画的圆的位置
+         * 
+         * @returns {number[][]} 返回位置数组
+         */
+        getPos: function() {
+            return position;
+        }    
+    }
 }
 
 function I_need_cirlce_and_line() {
@@ -156,24 +157,11 @@ function I_need_cirlce_and_line() {
      */
     for(let i = 0; i < pos.length; i++) {
         position[i] = [];
-        position[i].push([pos[i][0],pos[i][1]); 
+        position[i].push(pos[i][0],pos[i][1]); 
 
         for(let j = 0; j < RandomNumberBetween(1, 2); j++) {
             let newPos = getRandomPos(position[i][0],RandomNumberBetween(20, 30));
             position[i].push(newPos);
         }
     }
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
+} 
