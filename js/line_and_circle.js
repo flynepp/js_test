@@ -1,5 +1,6 @@
 // JavaScript Document
-var cav = document.getElementById("cav").getContext("2d");
+// var cav = document.getElementById("cav").getContext("2d");
+// var mainPosition = [];
 
 /**
  * 获取一个随机数，取值范围[0,n]
@@ -51,6 +52,21 @@ function getRandomPos(p, r) {
         p[0] + Math.round(r * Math.sin(angle)),
         p[1] + Math.round(r * Math.cos(angle))
     ];
+}
+
+/**
+ * 画线
+ * 
+ * @param {number[]} x - 起点坐标 [x, y]
+ * @param {number[]} y - 终点坐标 [x, y]
+ * @param {string} c - 线条颜色（例如 'rgba(255,0,0,1)'）
+ */
+function getLine(x, y, c) {
+    cav.strokeStyle = c; // 设置线条颜色
+    cav.beginPath();    // 开始一个新的路径
+    cav.moveTo(x[0], x[1]); // 移动到起点
+    cav.lineTo(y[0], y[1]); // 画线到终点
+    cav.stroke();       // 描边线条
 }
 
 /**
@@ -128,26 +144,10 @@ function Circles() {
     }
 }
 
-/**
- * 画线
- * 
- * @param {number[]} x - 起点坐标 [x, y]
- * @param {number[]} y - 终点坐标 [x, y]
- * @param {string} c - 线条颜色（例如 'rgba(255,0,0,1)'）
- */
-function getLine(x, y, c) {
-    cav.strokeStyle = c; // 设置线条颜色
-    cav.beginPath();    // 开始一个新的路径
-    cav.moveTo(x[0], x[1]); // 移动到起点
-    cav.lineTo(y[0], y[1]); // 画线到终点
-    cav.stroke();       // 描边线条
-}
-
 function I_need_cirlce_and_line() {
     const circle = Circles(); // 创建 Circles 实例
     circle.getCircle(50, 30); // 画 15 个圆，确保圆与圆之间的最小距离为 50 px
 
-    let position = [];
     let pos = circle.getPos(); // 获取所有圆的位置
     
     /**
@@ -167,12 +167,12 @@ function I_need_cirlce_and_line() {
      * ]
      */
     for(let i = 0; i < pos.length; i++) {
-        position[i] = []; // 初始化位置数组
-        position[i].push(pos[i]); // 添加圆的原始坐标
+        mainPosition[i] = []; // 初始化位置数组
+        mainPosition[i].push(pos[i]); // 添加圆的原始坐标
 
         let nnmn = RandomNumberBetween(1, 2);
         for(let j = 0; j < nnmn; j++) {
-            let newPos = getRandomPos(position[i][0], RandomNumberBetween(40, 60)); // 生成新坐标
+            let newPos = getRandomPos(mainPosition[i][0], RandomNumberBetween(40, 60)); // 生成新坐标
             oneCircle(
                 newPos[0],
                 newPos[1],
@@ -180,9 +180,86 @@ function I_need_cirlce_and_line() {
                 'rgba(25,0,25,0.5)',
             );
 
-            position[i].push(newPos); // 将新坐标添加到位置数组
+            mainPosition[i].push(newPos); // 将新坐标添加到位置数组
 
-            getLine(position[i][j], newPos, 'rgba(25,0,25,0.5)'); // 绘制从圆到新坐标的连线
+            getLine(mainPosition[i][j], newPos, 'rgba(25,0,25,0.5)'); // 绘制从圆到新坐标的连线
         }
     }
 }
+
+/**
+ * 计算抛物线的 y 值
+ * 
+ * 该函数使用标准抛物线方程 y = ax^2 + bx + c 计算给定 x 的 y 值。
+ * 
+ * @param {number} x -      自变量 x 的值，可以是浮点数
+ * @param {number} [a=-4] - 二次项系数， 默认值为 -4，可以是浮点数
+ * @param {number} [b= 4] - 一次项系数， 默认值为 4，可以是浮点数
+ * @param {number} [c= 0] - 常数项，    默认值为 0，可以是浮点数
+ * @returns {number} -      抛物线在给定 x 值处的 y 值
+ */
+function parabola(x, a = -4, b = 4, c = 0) {
+    let y = a * x * x + b * x + c; // 根据抛物线方程计算 y 值
+    return y; // 返回计算得到的 y 值
+}
+
+/**
+ * 更新画布并绘制圆形和线段
+ * 
+ * @param {number[][][]} r - 存储多个圆形位置和线段端点的数组
+ */
+function update_one_time(r) {
+    cav.reset();    // 重置画布
+
+    r.forEach(function(element) {
+        
+        // 绘制圆形
+        element.forEach(function(pos) {
+            oneCircle(pos[0], pos[1], RandomNumberBetween(2, 3), 'rgba(25,0,25,0.5)');
+        });
+
+        // 绘制线段
+        cav.strokeStyle = 'rgba(25,0,25,0.5)'; 
+        cav.beginPath();                      
+        cav.moveTo(element[0][0], element[0][1]); 
+        cav.lineTo(element[1][0], element[1][1]); 
+        if (element[2]) {                     
+            cav.lineTo(element[2][0], element[2][1]); 
+        }
+        cav.stroke();                         
+    });
+}
+
+
+function update_line_and_circle() {
+    
+    //生成位置变换数组
+    let transformation = [];
+    mainPosition.forEach(function(element, i) {
+        transformation[i] = [];
+
+        element.forEach(function(pos, j) {
+            transformation[i][j] = getRandomPos([0, 0], RandomNumberBetween(30, 40));
+        });
+    });
+
+    //生成时间数组
+    let transformeSecond = [];
+    for(let i = 16; i < 1000; i+= 16) {
+        transformeSecond.push(i/1000);
+    }
+
+    // 定时更新动画
+    let step = 0;
+    let interval = setInterval(function() {
+        if (step < transformeSecond.length) {
+            // 更新画布
+            update_one_time(transformation);
+            step++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 16); // 每16ms更新一次，大约60帧每秒
+}
+
+
