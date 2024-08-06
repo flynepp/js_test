@@ -188,19 +188,57 @@ function I_need_cirlce_and_line() {
 }
 
 /**
- * 计算抛物线的 y 值
+ * 计算位置关于时间的变换
  * 
- * 该函数使用标准抛物线方程 y = ax^2 + bx + c 计算给定 x 的 y 值。
+ * 该函数基于给定参数 a 和自变量 x 计算位置变换。使用多项式变换和参数调整计算新的位置。
  * 
- * @param {number} x -      自变量 x 的值，可以是浮点数
- * @param {number} [a=-4] - 二次项系数， 默认值为 -4，可以是浮点数
- * @param {number} [b= 4] - 一次项系数， 默认值为 4，可以是浮点数
- * @param {number} [c= 0] - 常数项，    默认值为 0，可以是浮点数
- * @returns {number} -      抛物线在给定 x 值处的 y 值
+ * @param {number} a - 特效平滑曲线，默认值为 1，浮点数或整数。(0,1)(1, 3)
+ * @param {number} t - 自变量，表示时间，浮点数或整数，取值范围为 [0, 1]。
+ * @returns {number} - 新的位置值
  */
-function parabola(x, a = -4, b = 4, c = 0) {
-    let y = a * x * x + b * x + c; // 根据抛物线方程计算 y 值
-    return y; // 返回计算得到的 y 值
+function movePosition(a = 1, t) {
+    let temp1 = 2 * t ** 3 - 3 * t ** 2;  // 多项式变换，用于计算中间变量
+    let temp2 = a * (temp1 + t);          // 调整变换幅度的中间变量
+    return temp2 - temp1;                 // 返回新的位置值
+}
+
+/**
+ * 计算从起始位置到目标位置的角度（弧度）
+ * 
+ * @param {number[]} startPos - 起始位置 [x, y]
+ * @param {number[]} finalPos - 目标位置 [x, y]
+ * @returns {number} - 计算得到的角度（弧度）
+ */
+function moveDegree(startPos, finalPos) {
+    const x = finalPos[0] - startPos[0]; // 计算 x 轴上的位移
+    const y = finalPos[1] - startPos[1]; // 计算 y 轴上的位移
+    return Math.atan2(y, x); // 计算并返回角度（弧度）
+}
+
+/**
+ * 计算新位置
+ * 
+ * @param {number[]} startPos - 起始位置 [x, y]
+ * @param {number[]} finalPos - 目标位置 [x, y]
+ * @param {number} [a=1] - 特效曲线 [0,1)(1, 3] float
+ * @param {number} t - 时间 (0,1)
+ * @returns {number[]} - 新的位置 [x, y]
+ */
+function move(startPos, finalPos, a = 1, t) {
+    // 计算从起始位置到目标位置的角度（以弧度为单位）
+    let degree = moveDegree(startPos, finalPos);
+
+    // 根据参数 a 和 t 计算位置变换值
+    let pos = movePosition(a, t);
+
+    // 计算新的 x 坐标
+    let x = startPos[0] + pos * Math.sin(degree);
+
+    // 计算新的 y 坐标
+    let y = startPos[1] + pos * Math.cos(degree);
+
+    // 返回新的位置
+    return [x, y];
 }
 
 /**
