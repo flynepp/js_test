@@ -231,13 +231,10 @@ function move(startPos, finalPos, a = 1, t) {
     // 根据参数 a 和 t 计算位置变换值
     let pos = movePosition(a, t);
 
-    // 计算新的 x 坐标
+    // 计算新的 x, y 坐标
     let x = startPos[0] + pos * Math.sin(degree);
-
-    // 计算新的 y 坐标
     let y = startPos[1] + pos * Math.cos(degree);
 
-    // 返回新的位置
     return [x, y];
 }
 
