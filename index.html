@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <input type="text" id="speed" />
+        <button id="change">speed change</button>
+        <script type="module">
+            import * as THREE from "three";
+            const array = [1, 2, 3, 4, 5, 6];
+
+            function setLight() {
+                const light = new THREE.DirectionalLight(0xffff22, 1);
+                light.position.set(10, 10, 10);
+                scene.add(light);
+
+                const ambientLight = new THREE.AmbientLight(0xaaaaff, 0.3);
+                scene.add(ambientLight);
+            }
+
+            function creatMaterial() {
+                const material = new THREE.MeshToonMaterial({
+                    color: 0x00ff00,
+                    side: THREE.DoubleSide,
+                });
+
+                return material;
+            }
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            setLight();
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.domElement.id = "canvas";
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = creatMaterial();
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            camera.position.z = 5;
+
+            let speed = 0.01;
+            let isAnimate = true;
+
+            document
+                .getElementById("change")
+                .addEventListener("click", function () {
+                    let inputSpeed = document.getElementById("speed").value;
+                    if (inputSpeed === "") {
+                        speed = 0.01;
+                    } else {
+                        speed = parseFloat(inputSpeed) * 0.01;
+                    }
+                });
+
+            function animate() {
+                if (isAnimate){
+                    requestAnimationFrame(animate);
+                    cube.rotation.x += speed;
+                    cube.rotation.y += speed;
+                }
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            const canvas = document.getElementById("canvas");
+            canvas.addEventListener("click", function () {
+                isAnimate = !isAnimate;
+                if (isAnimate) {
+                    animate();
+                }
+            });
+        </script>
+    </body>
+</html>
