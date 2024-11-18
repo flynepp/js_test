@@ -7,4 +7,9 @@ export default defineConfig({
         hmr: true,
         port: 3000,
     },
+    resolve: {
+        alias: {
+            vue: "vue/dist/vue.esm-bundler.js",
+        },
+    },
 });

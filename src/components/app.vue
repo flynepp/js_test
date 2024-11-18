@@ -23,5 +23,15 @@
 </template>
 
 <style>
+.todo-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    width: 40vw;
+}
+
 
 </style>
