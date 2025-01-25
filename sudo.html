@@ -168,6 +168,8 @@
   </body>
   <script>
     const table = document.querySelector("table");
+    let timerInterval = 1000;
+
     let errors = {
       row: { res: true, index: "" },
       col: { res: true, index: "" },
@@ -365,6 +367,7 @@
       let tempArr = resultArr.flat(2);
 
       if (uniqueCheck(resultArr) && !tempArr.some((value) => isNaN(value))) {
+        timerInterval = 999999;
         alert("Win");
       }
 
@@ -455,6 +458,6 @@
       let second = value % 60;
       
       time.innerText = `${minute < 10 ? "0" + minute : minute}:${second < 10 ? "0" + second : second}`;
-    }, 1000);
+    }, timerInterval);
   </script>
 </html>
