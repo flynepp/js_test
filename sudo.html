@@ -161,7 +161,10 @@
         <td></td>
       </tr>
     </table>
-    <button id="clear">clear</button>
+    <div>
+      <button id="clear">clear</button>
+      <div>time: <span id="time"></span></div>
+    </div>
   </body>
   <script>
     const table = document.querySelector("table");
@@ -437,5 +440,21 @@
         input.value = "";
       });
     });
+  </script>
+  <script>
+    const time = document.getElementById("time");
+    let startTime = new Date().getTime();
+
+    setInterval(() => {
+      let currentTime = new Date().getTime();
+      let diffTime = currentTime - startTime;
+
+      // 00:00
+      value = Math.floor(diffTime / 1000);
+      let minute = Math.floor(value / 60);
+      let second = value % 60;
+      
+      time.innerText = `${minute < 10 ? "0" + minute : minute}:${second < 10 ? "0" + second : second}`;
+    }, 1000);
   </script>
 </html>
