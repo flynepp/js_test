@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>move game</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #333;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+
+      #game-container {
+        position: relative;
+        width: 405px;
+        height: 405px;
+        background-color: #222;
+        border: 2px solid #555;
+      }
+
+      .people,
+      .box,
+      .struck {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        color: black;
+      }
+
+      .seat {
+        position: relative;
+        width: 20px;
+        height: 20px;
+      }
+
+      .seat::before,
+      .seat::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80%;
+        height: 3px;
+        background-color: rgb(182, 255, 47);
+        transform-origin: center;
+      }
+
+      .seat::before {
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+
+      .seat::after {
+        transform: translate(-50%, -50%) rotate(-45deg);
+      }
+
+      .seat {
+        position: absolute;
+      }
+
+      .bullet-vertical {
+        width: 5px;
+        height: 20px;
+        position: absolute;
+      }
+
+      .bullet-horizontal {
+        width: 20px;
+        height: 5px;
+        position: absolute;
+      }
+
+      .people {
+        background-color: #0f0;
+        border-radius: 50%;
+      }
+
+      .box {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #8b4513;
+        background: repeating-linear-gradient(
+          45deg,
+          #7a6140,
+          #deb887 20px,
+          #966d45 20px,
+          #d2a06e 40px
+        );
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .box::before,
+      .box::after {
+        content: "";
+        position: absolute;
+        width: 80%;
+        height: 2px;
+        background-color: #8b0000;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+      }
+
+      .box::before {
+        transform: translate(-50%, -50%) rotate(45deg); /* 旋转形成斜线 */
+      }
+
+      .box::after {
+        transform: translate(-50%, -50%) rotate(-45deg); /* 旋转形成另一条斜线 */
+      }
+
+      .bullet {
+        background-color: blueviolet;
+      }
+
+      .struck {
+        background-color: rgb(255, 255, 255);
+      }
+
+      #mission {
+        position: absolute;
+        top: -30px;
+        font-size: 18px;
+        color: white;
+      }
+      #move-counter {
+        font-size: 20px;
+        color: white;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex">
+      <div id="move-counter">Moves: 0</div>
+      <div id="game-container">
+        <div id="mission">MISSION: 1</div>
+        <div id="nextMission"></div>
+      </div>
+      <div id="buttonGroup">
+        <button id="showPos">showPos</button>
+        <select name="mission-change" id="mission-change"></select>
+        <div id="next">
+          <button
+            id="next-button"
+            onclick="nextMission()"
+            style="display: none"
+          >
+            next
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const missions = {
+        sample: {
+          people: [2, 2],
+          boxes: [
+            [2, 3],
+            [2, 3],
+          ],
+          seats: [
+            [2, 4],
+            [2, 3],
+          ],
+          strucks: [
+            [2, 1],
+            [1, 2],
+          ],
+        },
+        1: {
+          people: [2, 2],
+          boxes: [[2, 3]],
+          seats: [[2, 4]],
+          strucks: [
+            [2, 1],
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [2, 5],
+            [3, 2],
+            [3, 3],
+            [3, 4],
+          ],
+        },
+        2: {
+          people: [2, 2],
+          boxes: [
+            [3, 3],
+            [5, 5],
+          ],
+          seats: [
+            [4, 6],
+            [4, 4],
+          ],
+          strucks: [
+            [1, 2],
+            [1, 3],
+            [2, 1],
+            [2, 4],
+            [2, 5],
+            [2, 6],
+            [3, 1],
+            [4, 1],
+            [5, 2],
+            [6, 2],
+            [3, 7],
+            [4, 7],
+            [5, 7],
+            [3, 4],
+            [5, 4],
+            [7, 3],
+            [7, 4],
+            [7, 5],
+            [7, 6],
+            [6, 7],
+          ],
+        },
+        3: {
+          people: [1, 1],
+          boxes: [
+            [2, 2],
+            [3, 3],
+          ],
+          seats: [
+            [4, 2],
+            [5, 3],
+          ],
+          strucks: [
+            [1, 3],
+            [2, 3],
+            [3, 1],
+            [3, 5],
+            [4, 4],
+            [5, 2],
+            [6, 1],
+          ],
+        },
+        4: {
+          people: [2, 2],
+          boxes: [
+            [2, 4],
+            [2, 6],
+            [4, 4],
+            [4, 6],
+            [6, 4],
+            [6, 6],
+          ],
+          seats: [
+            [2, 5],
+            [2, 7],
+            [4, 5],
+            [4, 7],
+            [6, 5],
+            [6, 7],
+          ],
+          strucks: [
+            [1, 1],
+            [3, 3],
+            [3, 1],
+            [1, 3],
+            [5, 5],
+            [7, 7],
+            [5, 7],
+            [7, 5],
+            [1, 5],
+            [3, 7],
+            [3, 5],
+            [1, 7],
+            [7, 1],
+            [7, 3],
+            [5, 3],
+            [5, 1],
+          ],
+        },
+        5: {
+          people: [5, 5],
+          boxes: [
+            [3, 3],
+            [3, 5],
+            [5, 3],
+            [5, 4],
+          ],
+          seats: [
+            [3, 2],
+            [5, 2],
+            [4, 3],
+            [3, 4],
+          ],
+          strucks: [
+            [2, 1],
+            [3, 1],
+            [4, 1],
+            [5, 1],
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [1, 5],
+            [2, 6],
+            [3, 7],
+            [4, 7],
+            [5, 7],
+            [6, 6],
+            [6, 2],
+            [6, 3],
+            [7, 4],
+            [7, 5],
+            [6, 6],
+            [4, 2],
+            [4, 5],
+          ],
+        },
+      };
+
+      let mission = 5;
+
+      const gameContainer = document.getElementById("game-container");
+      const missionChange = document.getElementById("mission-change");
+      const next = document.getElementById("next-button");
+      const gridSize = 20;
+      let showPos = false;
+
+      const direction = {
+        ArrowUp: { axis: "y", operation: "--" },
+        ArrowDown: { axis: "y", operation: "++" },
+        ArrowLeft: { axis: "x", operation: "--" },
+        ArrowRight: { axis: "x", operation: "++" },
+        w: { axis: "y", operation: "--" },
+        s: { axis: "y", operation: "++" },
+        a: { axis: "x", operation: "--" },
+        d: { axis: "x", operation: "++" },
+      };
+
+      let box = {
+        x: 4,
+        y: 4,
+        character: "box",
+      };
+      let seat = { x: 6, y: 6 };
+      let struck = { x: 5, y: 5 };
+      let operation, people, strucks, boxes, seats, moveCount;
+      let collisionBoxes;
+      let collisionStrucks;
+      updateSelect();
+      init();
+
+      // 更新选项
+      function updateSelect() {
+        missionChange.innerHTML = "";
+        let missionSelections = Object.keys(missions);
+        missionSelections.forEach((element) => {
+          const selection = document.createElement("option");
+          selection.value = element;
+          selection.text = element;
+          missionChange.appendChild(selection);
+        });
+      }
+
+      // 选择关卡
+      function selectMission() {
+        document.activeElement.blur();
+
+        if (missionChange.value == mission) {
+          return;
+        }
+
+        mission = missionChange.value;
+        init();
+      }
+
+      function init() {
+        let person = missions[mission].people;
+        let originBoxes = missions[mission].boxes;
+        let originSeats = missions[mission].seats;
+        let originStrucks = missions[mission].strucks;
+        next.style.display = "none";
+        collisionBoxes = new Set();
+        collisionStrucks = new Set();
+        missionChange.value = mission;
+        moveCount = 0;
+
+        people = {
+          x: person[0],
+          y: person[1],
+          character: "people",
+        };
+        strucks = originStrucks.map(([x, y]) => ({ ...struck, x, y }));
+        boxes = originBoxes.map(([x, y]) => ({
+          ...box,
+          x: x,
+          y: y,
+        }));
+        seats = originSeats.map(([x, y]) => ({ ...seat, x, y }));
+
+        // 碰撞数组记录
+
+        strucks.forEach((struck) => {
+          let key = `${struck.x},${struck.y}`;
+          collisionStrucks.add(key);
+        });
+
+        boxes.forEach((box) => {
+          let key = `${box.x},${box.y}`;
+          collisionBoxes.add(key);
+        });
+      }
+
+      function updatePosition(target, operation) {
+        const move = direction[operation];
+        if (!move) return false; // 无效操作
+
+        const axis = move.axis;
+        const delta = move.operation === "++" ? 1 : -1;
+
+        // 生成目标位置
+        const nextPosition = { ...target, [axis]: target[axis] + delta };
+        const key = `${nextPosition.x},${nextPosition.y}`;
+
+        // 人物移动逻辑
+        if (target.character === "people") {
+          if (collisionStrucks.has(key)) {
+            // 前方是墙壁，无法移动
+            return false;
+          } else if (collisionBoxes.has(key)) {
+            // 前方是箱子
+            const box = boxes.find(
+              (box) => box.x === nextPosition.x && box.y === nextPosition.y
+            );
+            if (box && updatePosition(box, operation)) {
+              // 如果箱子移动成功，更新人物位置
+              target.x = nextPosition.x;
+              target.y = nextPosition.y;
+              moveCount++;
+              return true;
+            }
+            return false;
+          } else {
+            // 前方没有障碍，更新人物位置
+            target.x = nextPosition.x;
+            target.y = nextPosition.y;
+            moveCount++;
+            return true;
+          }
+        }
+
+        // 箱子移动逻辑
+        if (target.character === "box") {
+          if (!collisionStrucks.has(key) && !collisionBoxes.has(key)) {
+            collisionBoxes.add(key);
+            let needRemove = `${target.x},${target.y}`;
+            collisionBoxes.delete(needRemove);
+
+            // 没有障碍，更新箱子位置
+            target.x = nextPosition.x;
+            target.y = nextPosition.y;
+            return true;
+          }
+          return false;
+        }
+
+        return false;
+      }
+
+      function createElement(x, y, classNames) {
+        const element = document.createElement("div");
+
+        element.style.left = `${x * gridSize}px`;
+        element.style.top = `${y * gridSize}px`;
+
+        if (classNames instanceof Array) {
+          classNames.forEach((className) => {
+            element.classList.add(className);
+          });
+        } else {
+          element.classList.add(classNames);
+        }
+
+        gameContainer.appendChild(element);
+
+        if (showPos) {
+          const posElement = document.createElement("p");
+          posElement.innerText = `${x}${y}`;
+          element.append(posElement);
+        }
+
+        return element;
+      }
+
+      function update() {
+        document.getElementById(
+          "game-container"
+        ).innerHTML = `<div id="mission">MISSION: ${mission}</div>`;
+
+        document.addEventListener("keydown", opRecord);
+
+        // 位置更新
+        updatePosition(people, operation);
+
+        // カウント更新
+        document.getElementById(
+          "move-counter"
+        ).innerText = `Moves: ${moveCount}`;
+
+        // 通关判断
+        let allSeatsCovered = true;
+
+        for (let seat of seats) {
+          let key = `${seat.x},${seat.y}`;
+          if (!collisionBoxes.has(key)) {
+            allSeatsCovered = false;
+            break;
+          }
+        }
+        if (allSeatsCovered) {
+          let nowMission = parseInt(mission) + 1;
+          if (missions[nowMission]) {
+            next.style.display = "block";
+          } else {
+            youAreTheWinner();
+          }
+        }
+
+        // 画面渲染
+        createElement(people.x, people.y, "people");
+        boxes.forEach((box) => {
+          createElement(box.x, box.y, "box");
+        });
+        seats.forEach((seat) => {
+          createElement(seat.x, seat.y, "seat");
+        });
+        strucks.forEach((struck) => {
+          createElement(struck.x, struck.y, "struck");
+        });
+
+        operation = null;
+      }
+
+      function opRecord(event) {
+        operation = event.key;
+        console.log(operation);
+      }
+
+      function nextMission() {
+        ++mission;
+        init();
+      }
+
+      // 通关！
+      function youAreTheWinner() {
+        clearInterval(gameInterval);
+
+        document.getElementById(
+          "game-container"
+        ).innerHTML = `<div id="mission">ALL MISSIONS COMPLETED</div>`;
+      }
+
+      document.addEventListener("keydown", opRecord);
+      gameInterval = setInterval(update, 15);
+
+      const button = document.getElementById("showPos");
+      button.addEventListener("click", () => {
+        showPos = !showPos;
+      });
+      missionChange.addEventListener("change", selectMission);
+    </script>
+  </body>
+</html>
