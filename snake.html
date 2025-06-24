@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sanke game</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #333;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+
+      #game-container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        background-color: #222;
+        border: 2px solid #555;
+      }
+
+      .snake,
+      .food {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+      }
+
+      .snake {
+        background-color: #0f0;
+      }
+
+      .food {
+        background-color: #f00;
+      }
+
+      #score {
+        position: absolute;
+        top: -30px;
+        font-size: 18px;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex">
+      <div id="game-container">
+        <div id="score">Score: 0</div>
+      </div>
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="change the speed:default5(1-10)"
+          aria-label="change the speed"
+          aria-describedby="basic-addon2"
+          id="speed-input"
+        />
+        <button class="input-group-text" id="start">START</button>
+      </div>
+    </div>
+    <script>
+      const gameContainer = document.getElementById("game-container");
+      const scoreDisplay = document.getElementById("score");
+      const gridSize = 20;
+      const speedInput = document.getElementById("speed-input");
+      const startButton = document.getElementById("start");
+      let snake = [{ x: 3, y: 3 }];
+      let direction = { x: 1, y: 0 };
+      let food = {
+        x: Math.floor(Math.random() * 20),
+        y: Math.floor(Math.random() * 20),
+      };
+      let score = 0;
+      let gameInterval;
+      let speed = 200;
+
+      function createElement(x, y, className) {
+        const element = document.createElement("div");
+        element.style.left = `${x * gridSize}px`;
+        element.style.top = `${y * gridSize}px`;
+        element.classList.add(className);
+        gameContainer.appendChild(element);
+        return element;
+      }
+
+      function update() {
+        const head = {
+          x: snake[0].x + direction.x,
+          y: snake[0].y + direction.y,
+        };
+        if (
+          head.x < 0 ||
+          head.y < 0 ||
+          head.x >= 20 ||
+          head.y >= 20 ||
+          snake.some((segment) => segment.x === head.x && segment.y === head.y)
+        ) {
+          clearInterval(gameInterval);
+          snake = [{ x: 3, y: 3 }];
+          alert("Game Over! Your Score: " + score);
+          return;
+        }
+
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) {
+          score++;
+          scoreDisplay.innerText = `Score: ${score}`;
+          food = {
+            x: Math.floor(Math.random() * 20),
+            y: Math.floor(Math.random() * 20),
+          };
+        } else {
+          snake.pop();
+        }
+
+        gameContainer.innerHTML = `<div id="score">Score: ${score}</div>`;
+        snake.forEach((segment) =>
+          createElement(segment.x, segment.y, "snake")
+        );
+        createElement(food.x, food.y, "food");
+      }
+
+      function changeDirection(event) {
+        switch (event.key) {
+          case "ArrowUp":
+            if (direction.y === 0) direction = { x: 0, y: -1 };
+            break;
+          case "ArrowDown":
+            if (direction.y === 0) direction = { x: 0, y: 1 };
+            break;
+          case "ArrowLeft":
+            if (direction.x === 0) direction = { x: -1, y: 0 };
+            break;
+          case "ArrowRight":
+            if (direction.x === 0) direction = { x: 1, y: 0 };
+            break;
+        }
+      }
+      speedInput.addEventListener("change", function () {
+        value = speedInput.value;
+        speed = 1000 / value;
+      });
+      document.addEventListener("keydown", changeDirection);
+
+      startButton.addEventListener("click", function () {
+        snake = [{ x: 3, y: 3 }];
+        direction = { x: 1, y: 0 };
+        food = {
+          x: Math.floor(Math.random() * 20),
+          y: Math.floor(Math.random() * 20),
+        };
+        score = 0;
+        gameInterval;
+        speed = 200;
+
+        gameInterval = setInterval(update, speed);
+      });
+    </script>
+  </body>
+</html>

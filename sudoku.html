@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      let difficulty = 45;
+      let step = 5;
+    </script>
+    <style>
+      .container {
+        width: 800px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      td {
+        border: 1px solid rgb(146, 146, 146);
+        width: 30px;
+        height: 30px;
+      }
+
+      .left {
+        border-left: 2px solid black;
+      }
+      .top {
+        border-top: 2px solid black;
+      }
+      .right {
+        border-right: 2px solid black;
+      }
+      .bottom {
+        border-bottom: 2px solid black;
+      }
+      .error {
+        border: 5px solid red;
+      }
+
+      table {
+        position: relative;
+        margin: 10px;
+      }
+      .select {
+        position: absolute;
+      }
+      .row {
+        width: 332px;
+        height: 32px;
+      }
+      .col {
+        width: 32px;
+        height: 332px;
+      }
+      .block {
+        width: 109px;
+        height: 109px;
+      }
+
+      .history {
+        width: 300px;
+        border: 1px solid black;
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
+      .history-cell {
+        border: 1px solid white;
+        background-color: aqua;
+      }
+
+      td input {
+        border: none;
+        outline: none;
+        background-color: rgb(226, 255, 255);
+      }
+
+      .b-aqua {
+        background-color: rgb(234, 255, 255);
+      }
+    </style>
+    <title>sudo</title>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <table class="border-double"></table>
+        <div>
+          <button id="clear">clear</button>
+          <div id="level">difficulty: 45</div>
+          <div>30 easy; 40 medium; 50 hard</div>
+          <button id="up">level up</button>
+          <button id="down">level down</button>
+          <div>step:</div>
+          <input type="step" name="step" id="step" value="5" />
+          <p></p>
+          <input type="text" name="import-input" id="import-input" />
+          <button id="import">import</button><button id="export">export</button>
+        </div>
+      </div>
+      <div class="history" id="history"></div>
+    </div>
+  </body>
+  <script>
+    const upBtn = document.getElementById("up");
+    const downBtn = document.getElementById("down");
+    const level = document.getElementById("level");
+    const stepInput = document.getElementById("step");
+    const importBtn = document.getElementById("import");
+    const exportBtn = document.getElementById("export");
+    const importInput = document.getElementById("import-input");
+
+    let questionArr;
+
+    const table = document.querySelector("table");
+    for (let i = 0; i < 9; ++i) {
+      const tableRow = document.createElement("tr");
+      for (let j = 0; j < 9; ++j) {
+        const tableCell = document.createElement("td");
+        tableRow.appendChild(tableCell);
+      }
+      table.appendChild(tableRow);
+    }
+
+    let errors = {
+      row: { res: true, index: "" },
+      col: { res: true, index: "" },
+      block: { res: true, index: "" },
+    };
+
+    // 选择表格中的某个单元格
+    function selectCell(x, y) {
+      const tr = table.querySelectorAll("tr")[x];
+      return tr.querySelectorAll("td")[y];
+    }
+
+    let arr = new Array(9).fill(null).map(() => new Array(9).fill(0));
+
+    // 检查是否有效填充
+    function isValid(num, row, col) {
+      // 行
+      for (let i = 0; i < 9; i++) {
+        if (arr[row][i] === num) {
+          return false;
+        }
+      }
+      // 列
+      for (let i = 0; i < 9; i++) {
+        if (arr[i][col] === num) {
+          return false;
+        }
+      }
+      // 3x3
+      const blockRow = Math.floor(row / 3) * 3;
+      const blockCol = Math.floor(col / 3) * 3;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (arr[blockRow + i][blockCol + j] === num) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function fillSudoku() {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (arr[row][col] === 0) {
+            const nums = [...Array(9).keys()].map((i) => i + 1);
+            shuffleArray(nums);
+
+            for (let num of nums) {
+              if (isValid(num, row, col)) {
+                arr[row][col] = num;
+                selectCell(row, col).innerText = num;
+                selectCell(row, col).id = `${row}-${col}`;
+                selectCell(row, col).tabIndex = 0;
+                if (fillSudoku()) {
+                  return true;
+                }
+                arr[row][col] = 0;
+                selectCell(row, col).innerText = "";
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // 随机打乱数组
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // 检查每一行、列和3x3块的唯一性
+    function uniqueCheck(array) {
+      const checkArr = (arr, which) => {
+        arr = arr.map((row) => {
+          return row.filter(
+            (value) =>
+              value !== "" &&
+              value !== null &&
+              !isNaN(value) &&
+              value !== undefined
+          );
+        });
+
+        return arr.some((row, index) => {
+          if (new Set(row).size !== row.length) {
+            errors[which].res = false;
+            errors[which].index = index;
+            return true;
+          }
+          return false;
+        })
+          ? false
+          : true;
+      };
+
+      let tempArr = new Array(9).fill(null).map(() => new Array(9).fill(0));
+
+      // row check
+      tempArr = array.map((row) => [...row]);
+      let allRowsUnique = checkArr(tempArr, "row");
+
+      // col check
+      tempArr = array[0].map((_, i) => array.map((row) => row[i]));
+      let allColsUnique = checkArr(tempArr, "col");
+
+      // block check
+      tempArr = [];
+      for (let blockRow = 0; blockRow < 3; blockRow++) {
+        for (let blockCol = 0; blockCol < 3; blockCol++) {
+          let block = [];
+          for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+              block.push(array[blockRow * 3 + i][blockCol * 3 + j]);
+            }
+          }
+          tempArr.push(block);
+        }
+      }
+      let allBlocksUnique = checkArr(tempArr, "block");
+
+      return allRowsUnique && allColsUnique && allBlocksUnique;
+    }
+
+    function initSelect() {
+      const select = document.createElement("div");
+      select.classList.add("select", "error");
+
+      table.appendChild(select);
+      return select;
+    }
+
+    function paint(need) {
+      if (need) {
+        let index;
+
+        if (errors.row.res == false) {
+          let selectRow = initSelect();
+          selectRow.classList.add("row");
+
+          index = errors.row.index;
+          selectRow.style.left = "-5px";
+          selectRow.style.top = `${index * 37 - 5}px`;
+        }
+        if (errors.col.res == false) {
+          let selectCol = initSelect();
+          selectCol.classList.add("col");
+
+          index = errors.col.index;
+          selectCol.style.top = "-5px";
+          selectCol.style.left = `${index * 37 - 5}px`;
+        }
+        if (errors.block.res == false) {
+          let selectBlock = initSelect();
+          selectBlock.classList.add("block");
+
+          let x = errors.block.index % 3;
+          let y = Math.floor(errors.block.index / 3);
+          selectBlock.style.top = `${y * 111 - 5}px`;
+          selectBlock.style.left = `${x * 111 - 5}px`;
+        }
+      } else {
+        const elements = document.getElementsByClassName("select");
+
+        Array.from(elements).forEach((element) => {
+          element.remove();
+        });
+      }
+    }
+
+    function check() {
+      let resultArr = new Array(9).fill(null).map(() => new Array(9).fill(0));
+      for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+          const cell = selectCell(x, y);
+          let value;
+
+          if (cell.querySelector("input")) {
+            value = cell.querySelector("input").value;
+          } else {
+            value = cell.innerText;
+          }
+
+          resultArr[x][y] = parseInt(value);
+        }
+      }
+
+      let tempArr = resultArr.flat(2);
+
+      if (uniqueCheck(resultArr) && !tempArr.some((value) => isNaN(value))) {
+        alert("Win");
+      }
+
+      paint(!uniqueCheck(resultArr));
+    }
+
+    function answerInit() {
+      let rowPoses = [];
+      for (let row = 0; row < 9; row++) {
+        let rowBlock = [];
+        for (let col = 0; col < 9; col++) {
+          rowBlock.push({ x: row, y: col });
+        }
+        rowPoses.push(rowBlock);
+      }
+
+      let colPoses = [];
+      for (let col = 0; col < 9; col++) {
+        let colBlock = [];
+        for (let row = 0; row < 9; row++) {
+          colBlock.push({ x: row, y: col });
+        }
+        colPoses.push(colBlock);
+      }
+
+      let blockPoses = [];
+      for (let blockRow = 0; blockRow < 3; blockRow++) {
+        for (let blockCol = 0; blockCol < 3; blockCol++) {
+          let block = [];
+          for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+              let x = blockRow * 3 + i;
+              let y = blockCol * 3 + j;
+              block.push({ x, y });
+            }
+          }
+          blockPoses.push(block);
+        }
+      }
+      blockPoses.forEach((row) => {
+        selectCell(row[0].x, row[0].y).classList.add("left", "top");
+        selectCell(row[2].x, row[2].y).classList.add("right", "top");
+        selectCell(row[6].x, row[6].y).classList.add("left", "bottom");
+        selectCell(row[8].x, row[8].y).classList.add("right", "bottom");
+
+        selectCell(row[1].x, row[1].y).classList.add("top");
+        selectCell(row[3].x, row[3].y).classList.add("left");
+        selectCell(row[5].x, row[5].y).classList.add("right");
+        selectCell(row[7].x, row[7].y).classList.add("bottom");
+      });
+
+      questionArr = JSON.parse(JSON.stringify(blockPoses.flat(2)));
+      for (let i = 0; i < 81 - difficulty; i++) {
+        let num = Math.floor(Math.random() * questionArr.length);
+        questionArr.splice(num, 1);
+      }
+
+      console.log(questionArr);
+      genAnswerInput(questionArr);
+    }
+
+    function genAnswerInput(questionArr) {
+      questionArr.forEach((question) => {
+        let cell = selectCell(question.x, question.y);
+        cell.classList.add("b-aqua");
+        cell.innerHTML = `<input id="${question.x}-${question.y}" style="width: 20px; z-index: 50;position: relative;" type="text">`;
+        cell.removeAttribute("id");
+      });
+    }
+
+    function base64导出() {
+      const bytes = new Uint8Array(81);
+
+      const questionSet = new Set(questionArr.map(({ x, y }) => x * 9 + y));
+
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          const idx = row * 9 + col;
+          const value = arr[row][col];
+          bytes[idx] = (questionSet.has(idx) ? 0x10 : 0x00) | (value & 0x0f);
+        }
+      }
+
+      return btoa(String.fromCharCode(...bytes)).replace(/=/g, "");
+    }
+
+    function base64导入(base64Str) {
+      const padded = base64Str.padEnd(
+        base64Str.length + ((4 - (base64Str.length % 4)) % 4),
+        "="
+      );
+      const binary = atob(padded);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      arr = Array.from({ length: 9 }, () => new Array(9).fill(0));
+      questionArr = [];
+
+      for (let idx = 0; idx < 81; idx++) {
+        const row = Math.floor(idx / 9);
+        const col = idx % 9;
+        const byte = bytes[idx];
+        const value = byte & 0x0f;
+        const isQuestion = (byte & 0xf0) === 0x10;
+
+        arr[row][col] = value;
+        if (isQuestion) {
+          questionArr.push({ x: row, y: col });
+        }
+      }
+    }
+
+    const init = () => {
+      clearTable();
+      arr = new Array(9).fill(null).map(() => new Array(9).fill(0));
+      fillSudoku();
+      console.log(arr);
+      answerInit();
+
+      level.innerText = `difficulty: ${difficulty}`;
+      document.getElementById("history").innerHTML = "";
+
+      const inputs = document.querySelectorAll("input");
+      inputs.forEach((input) => {
+        input.addEventListener("change", () => {
+          check();
+
+          newHistory(input.id, input.value);
+        });
+      });
+    };
+
+    const clearBtn = document.getElementById("clear");
+    clearBtn.addEventListener("click", () => {
+      inputs.forEach((input) => {
+        input.value = "";
+      });
+    });
+
+    const clearTable = () => {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          const cell = selectCell(row, col);
+          cell.innerHTML = "";
+        }
+      }
+    };
+
+    init();
+
+    upBtn.addEventListener("click", () => {
+      difficulty += step;
+      init();
+    });
+    downBtn.addEventListener("click", () => {
+      difficulty -= step;
+      init();
+    });
+    stepInput.addEventListener("change", () => {
+      step = parseInt(stepInput.value);
+    });
+
+    exportBtn.addEventListener("click", () => {
+      const value = base64导出();
+      importInput.value = value;
+    });
+
+    importBtn.addEventListener("click", () => {
+      const value = importInput.value;
+
+      base64导入(value);
+      clearTable();
+      answerInit();
+
+      for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+          const cell = selectCell(x, y);
+          cell.innerText = arr[x][y];
+        }
+      }
+
+      genAnswerInput(questionArr);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      const activeElement = document.activeElement;
+      const id = activeElement.id;
+      let row = id[0];
+      let col = id[2];
+
+      switch (event.key) {
+        case "ArrowUp":
+          --row;
+          break;
+        case "ArrowDown":
+          ++row;
+          break;
+        case "ArrowLeft":
+          --col;
+          break;
+        case "ArrowRight":
+          ++col;
+          break;
+        default:
+          break;
+      }
+
+      if (row < 0 || col < 0 || row > 8 || col > 8) {
+        return;
+      }
+
+      const nextActiveElement = document.getElementById(`${row}-${col}`);
+      nextActiveElement.focus();
+    });
+  </script>
+  <script>
+    let count = 1;
+    const history = document.getElementById("history");
+
+    // <div class="history-cell">1: update 5-1, value=5</div>
+    function newHistory(pos, value) {
+      const historyRecord = document.createElement("div");
+      historyRecord.classList.add("history-cell");
+      historyRecord.innerText = `${count}: ${pos}, value=${value}`;
+      historyRecord.dataValue = value;
+
+      history.appendChild(historyRecord);
+      ++count;
+    }
+  </script>
+</html>
