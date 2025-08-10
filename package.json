@@ -10,6 +10,7 @@
   "dependencies": {
     "@vitejs/plugin-vue": "^5.2.0",
     "core-js": "^3.8.3",
+    "three": "^0.179.1",
     "vite": "^5.4.11",
     "vue": "^3.5.13"
   },
